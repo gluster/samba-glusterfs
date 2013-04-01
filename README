@@ -1,0 +1,22 @@
+Samba VFS modules for GlusterFS
+
+To build:
+
+1.) Download and unpack a Samba source tree.
+2.) ./autogen.sh
+3.) ./configure --with-samba-source=/path/to/samba_dir/source3
+4.) make
+
+To install:
+
+    make install
+
+Clean-up commands:
+
+1.) make clean
+    Removes build files.
+
+2.) make distclean
+    Removes any files generated from all the above commands, including the
+    Makefile.
+

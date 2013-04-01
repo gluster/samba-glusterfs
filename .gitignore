@@ -1,0 +1,8 @@
+config.log
+config.status
+config.cache
+configure
+module_config.h
+module_config.h.in
+Makefile
+*.o
