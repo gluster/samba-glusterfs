@@ -34,8 +34,13 @@
  *
  * Notes:
  *  + For each direct-connect Gluster share defined in your smb.conf file,
- *    add the following parameterr to the share declaration:
- *      vfs objects = glusterfs
+ *    add the following parameter to the share declaration:
+ *     vfs objects = glusterfs
+ *
+ *  + The GlusterFS VFS module communicates directly with Gluster via
+ *    libgfapi.  There is no mounted file system underlying the share, so
+ *    no other VFS modules can be stacked below this one (unless they also
+ *    communicate with libgfapi).
  *
  * ========================================================================== **
  */
@@ -44,7 +49,69 @@
 
 
 /* -------------------------------------------------------------------------- **
- * Static Globals:
+ * Static Functions:
+ */
+
+static int glu_connect( struct vfs_handle_struct *handle,
+                        const char               *service,
+                        const char               *user )
+  /* ------------------------------------------------------------------------ **
+   *
+   *
+   * ------------------------------------------------------------------------ **
+   */
+  {
+  } /* glu_connect */
+
+static bool glu_aio_force( struct vfs_handle_struct *handle,
+                           struct files_struct      *fsp )
+  /* ------------------------------------------------------------------------ **
+   *
+   *  Notes:  AsyncIO is not yet supported, so we set <errno> to ENOTSUP
+   *          and return -1 to indicate an error.
+   *
+   * ------------------------------------------------------------------------ **
+   */
+  {
+  errno = ENOTSUP;
+  return( -1 );
+  } /* glu_aio_force */
+
+static bool glu_is_offline( struct vfs_handle_struct  *handle,
+                            const struct smb_filename *fname,
+                            SMB_STRUCT_STAT           *sbuf )
+  /* ------------------------------------------------------------------------ **
+   *
+   * ------------------------------------------------------------------------ **
+   */
+  {
+  return( false );
+  } /* glu_is_offline */
+
+static int glu_set_offline( struct vfs_handle_struct  *handle,
+                            const struct smb_filename *fname )
+  /* ------------------------------------------------------------------------ **
+   * Set a
+   *
+   *  Input:  handle  - Pointer to a ???
+   *          fname   - Pointer to a ???
+   *
+   *  Output: An integer.  A negative return
+   *
+   *  Notes:  This feature is not yet implemented, so this function sets the
+   *          global <errno> to ENOTSUP to indicate that it's not supported.
+   *          The function returns -1 to indicate an error.
+   *
+   * ------------------------------------------------------------------------ **
+   */
+  {
+  errno = ENOTSUP;
+  return( -1 );
+  } /* glu_set_offline */
+
+
+/* -------------------------------------------------------------------------- **
+ * Mapping of VFS Functions:
  *
  *  vfs_glusterfs_fns - A list of all of the VFS functions defined by this
  *                      module.  The initialization uses C89/C99 syntax.
@@ -136,58 +203,6 @@ static struct vfs_fn_pointers vfs_glusterfs_fns =
 
 
 /* -------------------------------------------------------------------------- **
- * Static Functions:
- */
-
-
-static bool glu_aio_force( struct vfs_handle_struct *handle,
-                           struct files_struct      *fsp )
-  /* ------------------------------------------------------------------------ **
-   *
-   *  Notes:  AsyncIO is not yet supported, so we set <errno> to ENOTSUP
-   *          and return -1 to indicate an error.
-   *
-   * ------------------------------------------------------------------------ **
-   */
-  {
-  errno = ENOTSUP;
-  return( -1 );
-  } /* glu_aio_force */
-
-static bool glu_is_offline( struct vfs_handle_struct  *handle,
-                            const struct smb_filename *fname,
-                            SMB_STRUCT_STAT           *sbuf )
-  /* ------------------------------------------------------------------------ **
-   *
-   * ------------------------------------------------------------------------ **
-   */
-  {
-  return( false );
-  } /* glu_is_offline */
-
-static int glu_set_offline( struct vfs_handle_struct  *handle,
-                            const struct smb_filename *fname )
-  /* ------------------------------------------------------------------------ **
-   * Set a
-   *
-   *  Input:  handle  - Pointer to a ???
-   *          fname   - Pointer to a ???
-   *
-   *  Output: An integer.  A negative return
-   *
-   *  Notes:  This feature is not yet implemented, so this function sets the
-   *          global <errno> to ENOTSUP to indicate that it's not supported.
-   *          The function returns -1 to indicate an error.
-   *
-   * ------------------------------------------------------------------------ **
-   */
-  {
-  errno = ENOTSUP;
-  return( -1 );
-  } /* glu_set_offline */
-
-
-/* -------------------------------------------------------------------------- **
  * Exported Functions:
  */
 
@@ -214,15 +229,10 @@ NTSTATUS vfs_glusterfs_init( void )
   {
   int result;
 
-
   result = smb_register_vfs( SMB_VFS_INTERFACE_VERSION,
                              "glusterfs",
                              &(vfs_glusterfs_fns) );
   return( result );
   } /* vfs_glusterfs_init */
 
-
 /* ========================================================================== */
-
-
-

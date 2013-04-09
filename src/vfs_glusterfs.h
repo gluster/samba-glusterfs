@@ -36,8 +36,13 @@
  *
  * Notes:
  *  + For each direct-connect Gluster share defined in your smb.conf file,
- *    add the following parameterr to the share declaration:
+ *    add the following parameter to the share declaration:
  *      vfs objects = glusterfs
+ *
+ *  + The GlusterFS VFS module communicates directly with Gluster via
+ *    libgfapi.  There is no mounted file system underlying the share, so
+ *    no other VFS modules can be stacked below this one (unless they also
+ *    communicate with libgfapi).
  *
  * ========================================================================== **
  */
