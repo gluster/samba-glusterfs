@@ -35,7 +35,7 @@
  * Notes:
  *  + For each direct-connect Gluster share defined in your smb.conf file,
  *    add the following parameter to the share declaration:
- *     vfs objects = glusterfs
+ *      vfs objects = glusterfs
  *
  *  + The GlusterFS VFS module communicates directly with Gluster via
  *    libgfapi.  There is no mounted file system underlying the share, so
@@ -52,6 +52,8 @@
  * Static Functions:
  */
 
+/* Volume Operations */
+
 static int glu_connect( struct vfs_handle_struct *handle,
                         const char               *service,
                         const char               *user )
@@ -62,6 +64,157 @@ static int glu_connect( struct vfs_handle_struct *handle,
    */
   {
   } /* glu_connect */
+
+static void glu_disconnect( struct vfs_handle_struct *handle )
+  /* ------------------------------------------------------------------------ **
+   *
+   *
+   * ------------------------------------------------------------------------ **
+   */
+  {
+  } /* glu_disconnect */
+
+static uint64_t glu_disk_free( struct vfs_handle_struct *handle,
+                               const char               *path,
+                               bool                      small_query,
+                               uint64_t                 *bsize,
+                               uint64_t                 *dfree,
+                               uint64_t                 *dsize )
+  /* ------------------------------------------------------------------------ **
+   *
+   *
+   * ------------------------------------------------------------------------ **
+   */
+  {
+  } /* glu_disk_free */
+
+static int glu_get_quota( struct vfs_handle_struct *handle,
+                          enum SMB_QUOTA_TYPE       qtype,
+                          unid_t                    id,
+                          SMB_DISK_QUOTA           *qt )
+  /* ------------------------------------------------------------------------ **
+   *
+   *
+   * ------------------------------------------------------------------------ **
+   */
+  {
+  } /* glu_get_quota */
+
+static int glu_set_quota( struct vfs_handle_struct *handle,
+                          enum SMB_QUOTA_TYPE       qtype,
+                          unid_t                    id,
+                          SMB_DISK_QUOTA           *qt )
+  /* ------------------------------------------------------------------------ **
+   *
+   *
+   * ------------------------------------------------------------------------ **
+   */
+  {
+  } /* glu_set_quota */
+
+static int glu_statvfs( struct vfs_handle_struct  *handle,
+                        const char                *path,
+                        struct vfs_statvfs_struct *statbuf )
+  /* ------------------------------------------------------------------------ **
+   *
+   *
+   * ------------------------------------------------------------------------ **
+   */
+  {
+  } /* glu_statvfs */
+
+
+/* Directory Operations */
+
+static SMB_STRUCT_DIR *glu_opendir( struct vfs_handle_struct *handle,
+                                    const char               *fname,
+                                    const char               *mask,
+                                    uint32                    attributes )
+  /* ------------------------------------------------------------------------ **
+   *
+   *
+   * ------------------------------------------------------------------------ **
+   */
+  {
+  } /* glu_opendir */
+
+static int glu_closedir( struct vfs_handle_struct *handle,
+                         SMB_STRUCT_DIR           *dir )
+  /* ------------------------------------------------------------------------ **
+   *
+   *
+   * ------------------------------------------------------------------------ **
+   */
+  {
+  } /* glu_closedir */
+
+static SMB_STRUCT_DIRENT *glu_readdir( struct vfs_handle_struct *handle,
+                                       SMB_STRUCT_DIR           *dirp,
+                                       SMB_STRUCT_STAT          *sbuf )
+  /* ------------------------------------------------------------------------ **
+   *
+   *
+   * ------------------------------------------------------------------------ **
+   */
+  {
+  } /* glu_readdir */
+
+static void glu_seekdir( struct vfs_handle_struct *handle,
+                         SMB_STRUCT_DIR           *dirp,
+                         long                      offset )
+  /* ------------------------------------------------------------------------ **
+   *
+   *
+   * ------------------------------------------------------------------------ **
+   */
+  {
+  } /* glu_seekdir */
+
+static long glu_telldir( struct vfs_handle_struct *handle,
+                         SMB_STRUCT_DIR           *dirp )
+  /* ------------------------------------------------------------------------ **
+   *
+   *
+   * ------------------------------------------------------------------------ **
+   */
+  {
+  } /* glu_telldir */
+
+static void glu_rewinddir( struct vfs_handle_struct *handle,
+                           SMB_STRUCT_DIR           *dirp )
+  /* ------------------------------------------------------------------------ **
+   *
+   *
+   * ------------------------------------------------------------------------ **
+   */
+  {
+  } /* glu_rewinddir */
+
+static int glu_mkdir( struct vfs_handle_struct *handle,
+                      const char               *path,
+                      mode_t                    mode )
+  /* ------------------------------------------------------------------------ **
+   *
+   *
+   * ------------------------------------------------------------------------ **
+   */
+  {
+  } /* glu_mkdir */
+
+
+static int glu_rmdir( struct vfs_handle_struct *handle, const char *path )
+  /* ------------------------------------------------------------------------ **
+   *
+   *
+   * ------------------------------------------------------------------------ **
+   */
+  {
+  } /* glu_rmdir */
+
+
+/* File operations. */
+/* Extended Attribute (EA) operations.  */
+/* Async I/O operations.  */
 
 static bool glu_aio_force( struct vfs_handle_struct *handle,
                            struct files_struct      *fsp )
@@ -76,6 +229,9 @@ static bool glu_aio_force( struct vfs_handle_struct *handle,
   errno = ENOTSUP;
   return( -1 );
   } /* glu_aio_force */
+
+
+/* Offline operations.  */
 
 static bool glu_is_offline( struct vfs_handle_struct  *handle,
                             const struct smb_filename *fname,
@@ -136,13 +292,13 @@ static struct vfs_fn_pointers vfs_glusterfs_fns =
 
   /* Directory operations.  */
   .opendir    = glu_opendir,
+  .closedir   = glu_closedir,
   .readdir    = glu_readdir,
   .seekdir    = glu_seekdir,
   .telldir    = glu_telldir,
   .rewind_dir = glu_rewinddir,
   .mkdir      = glu_mkdir,
   .rmdir      = glu_rmdir,
-  .closedir   = glu_closedir,
 
   /* File operations. */
   .open_fn    = glu_open,
