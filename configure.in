@@ -63,6 +63,35 @@ AC_SUBST(EXTRA_BIN_PROGS)
 AC_SUBST(EXTRA_SBIN_PROGS)
 AC_SUBST(EXTRA_ALL_TARGETS)
 
+AC_ARG_WITH(glusterfs,
+[  --with-glusterfs=dir    Use custome GlusterFS installation path (default=/usr)])
+
+if test "x$with_glusterfs" = "x"; then
+   CPPFLAGS="$CPPFLAGS -I/usr/include/glusterfs";
+   LDFLAGS="$LDFLAGS -L/usr/lib -L/usr/lib64 -lgfapi -lglusterfs -lgfrpc -lgfxdr"
+else
+   CPPFLAGS="$CPPFLAGS -I$with_glusterfs/include/glusterfs"
+   LDFLAGS="$LDFLAGS -L$with_glusterfs/lib -L$with_glusterfs/lib64 -lgfapi -lglusterfs -lgfrpc -lgfxdr"
+fi
+
+AC_CHECK_HEADER([api/glfs.h],[have_api_glfs_h=yes],[have_api_glfs_h=no])
+
+if test "x$have_api_glfs_h" != "xyes"; then
+	echo
+	echo "Cannot find api/glfs.h. Please specify --with-glusterfs=dir if necessary"
+	echo
+	exit 1
+fi
+
+AC_CHECK_FUNC([glfs_init],[have_glfs_init=yes],[have_glfs_init=no])
+
+if test "x$have_glfs_init" != "xyes"; then
+	echo
+	echo "Cannot link to gfapi (glfs_init). Please specify --with-glusterfs=dir if necessary"
+	echo
+	exit 1
+fi
+
 AC_ARG_ENABLE(debug, 
 [  --enable-debug          Turn on compiler debugging information (default=no)],
     [if eval "test x$enable_debug = xyes"; then
