@@ -22,8 +22,8 @@ AC_PREFIX_DEFAULT(/usr/local/samba)
 
 AC_ARG_WITH(fhs, 
 [  --with-fhs              Use FHS-compliant paths (default=no)],
-    libdir="\${prefix}/lib/samba",
-    libdir="\${prefix}/lib")
+    libdir="${libdir}/samba",
+    libdir="${libdir}")
 
 AC_SUBST(libdir)
 
@@ -64,7 +64,7 @@ AC_SUBST(EXTRA_SBIN_PROGS)
 AC_SUBST(EXTRA_ALL_TARGETS)
 
 AC_ARG_WITH(glusterfs,
-[  --with-glusterfs=dir    Use custome GlusterFS installation path (default=/usr)])
+[  --with-glusterfs=DIR    Use custom GlusterFS installation path (default=/usr)])
 
 if test "x$with_glusterfs" = "x"; then
    CPPFLAGS="$CPPFLAGS -I/usr/include/glusterfs";

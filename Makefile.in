@@ -20,14 +20,14 @@ FLAGS		=  $(CFLAGS) $(CPPFLAGS) -fPIC \
 		-I$(SAMBA_SOURCE) -I.
 
 
-prefix		= @prefix@
+exec_prefix	= @prefix@
 libdir		= @libdir@
 
 VFS_LIBDIR	= $(libdir)/vfs
 
 SRC_DIR		= src
 SRC_FILES	= $(SRC_DIR)/%.c
-OUT_DIR		= lib
+OUT_DIR		= .libs
 OUT_FILES	= $(OUT_DIR)/%.$(SHLIBEXT)
 
 # Auto target
@@ -37,6 +37,7 @@ default: $(patsubst $(SRC_FILES),$(OUT_FILES),$(wildcard src/*.c))
 
 $(OUT_FILES): %.$(OBJEXT)
 	@echo "Linking $@"
+	mkdir -p $(OUT_DIR)
 	@$(CC) $(LDSHFLAGS) $(LDFLAGS) -o $@ $<
 
 %.$(OBJEXT): $(SRC_FILES)
@@ -45,13 +46,14 @@ $(OUT_FILES): %.$(OBJEXT)
 
 
 install: default
+	rename vfs_ "" $(OUT_DIR)/*
 	$(INSTALLCMD) -d $(VFS_LIBDIR)
-	$(INSTALLCMD) -m 755 $(OUT_FILES) $(VFS_LIBDIR)
+	$(INSTALLCMD) -m 755 $(OUT_DIR)/* $(VFS_LIBDIR)
 
 # Misc targets
 clean:
 	rm -rf .libs
-	rm -f core *~ *% *.bak *.o $(OUT_FILES)
+	rm -f core *~ *% *.bak *.o
 
 distclean: clean
 	rm -f config.log config.status config.cache configure module_config.h module_config.h.in Makefile
