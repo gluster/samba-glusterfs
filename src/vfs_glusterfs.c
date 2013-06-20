@@ -844,6 +844,10 @@ static int vfs_gluster_get_real_filename(struct vfs_handle_struct *handle,
 		return -1;
 	}
 
+	if (ret < 0) {
+		return -1;
+	}
+
 	*found_name = talloc_strdup(mem_ctx, val_buf);
 	if (found_name[0] == NULL) {
 		errno = ENOMEM;
