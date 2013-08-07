@@ -297,7 +297,6 @@ vfs_gluster_disk_free(struct vfs_handle_struct *handle, const char *path,
 		      uint64_t *dsize_p)
 {
 	struct statvfs statvfs = { 0, };
-	uint64_t dfree = 0;
 	int ret;
 
 	ret = glfs_statvfs(handle->data, path, &statvfs);
@@ -307,19 +306,17 @@ vfs_gluster_disk_free(struct vfs_handle_struct *handle, const char *path,
 		return -1;
 	}
 
-	dfree = statvfs.f_bsize * statvfs.f_bavail;
-
 	if (bsize_p) {
-		*bsize_p = statvfs.f_bsize;
+		*bsize_p = (uint64_t)statvfs.f_bsize; /* Block size */
 	}
 	if (dfree_p) {
-		*dfree_p = dfree;
+		*dfree_p = (uint64_t)statvfs.f_bavail; /* Available Block units */
 	}
 	if (dsize_p) {
-		*dsize_p = statvfs.f_bsize * statvfs.f_blocks;
+		*dsize_p = (uint64_t)statvfs.f_blocks; /* Total Block units */
 	}
 
-	return dfree;
+	return (uint64_t)statvfs.f_bavail;
 }
 
 static int
