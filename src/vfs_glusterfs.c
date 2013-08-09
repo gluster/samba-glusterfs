@@ -991,6 +991,45 @@ struct gluster_acl_header {
 	struct gluster_ace entries[];
 };
 
+static int gluster_ace_cmp (const void *val1, const void *val2)
+{
+	const struct gluster_ace *ace1 = NULL;
+	const struct gluster_ace *ace2 = NULL;
+	int                        ret = 0;
+
+	ace1 = val1;
+	ace2 = val2;
+
+	ret = (ace1->tag - ace2->tag);
+	if (!ret)
+		ret = (ace1->id - ace2->id);
+
+	return ret;
+}
+
+static void gluster_acl_normalize (struct gluster_acl_header *acl, int count)
+{
+	qsort (acl->entries, count, sizeof (struct gluster_ace *),
+	       gluster_ace_cmp);
+}
+
+static void gluster_acl_to_xattr (struct gluster_acl_header *acl, int count)
+{
+	struct gluster_ace *ace;
+	int i;
+
+	ace = acl->entries;
+
+	SIVAL(&acl->version, 0, acl->version);
+
+	for (i = 0; i < count; i++) {
+		SSVAL(&ace->tag, 0, ace->tag);
+		SSVAL(&ace->perm, 0, ace->perm);
+		SIVAL(&ace->id, 0, ace->id);
+		ace++;
+	}
+}
+
 static SMB_ACL_T gluster_to_smb_acl(const char *buf, size_t xattr_size)
 {
 	int count;
@@ -1026,9 +1065,9 @@ static SMB_ACL_T gluster_to_smb_acl(const char *buf, size_t xattr_size)
 
 	hdr = (void *)buf;
 
-	if (ntohl(hdr->version) != GLUSTER_ACL_VERSION) {
+	if (GLUSTER_ACL_VERSION != IVAL(&hdr->version, 0)) {
 		DEBUG(0, ("Unknown gluster ACL version: %d\n",
-			  ntohl(hdr->version)));
+			  IVAL(&hdr->version, 0)));
 		return NULL;
 	}
 
@@ -1044,7 +1083,7 @@ static SMB_ACL_T gluster_to_smb_acl(const char *buf, size_t xattr_size)
 	ace = hdr->entries;
 
 	for (i = 0; i < count; i++) {
-		tag = ntohs(ace->tag);
+		tag = SVAL(&ace->tag, 0);
 
 		switch(tag) {
 		case GLUSTER_ACL_USER:
@@ -1070,7 +1109,7 @@ static SMB_ACL_T gluster_to_smb_acl(const char *buf, size_t xattr_size)
 			return NULL;
 		}
 
-		id = ntohl(ace->id);
+		id = IVAL(&ace->id, 0);
 
 		switch(smb_ace->a_type) {
 		case SMB_ACL_USER:
@@ -1083,7 +1122,7 @@ static SMB_ACL_T gluster_to_smb_acl(const char *buf, size_t xattr_size)
 			break;
 		}
 
-		perm = ntohs(ace->perm);
+		perm = SVAL(&ace->perm, 0);
 
 		smb_ace->a_perm = 0;
 		smb_ace->a_perm |=
@@ -1128,7 +1167,7 @@ static ssize_t smb_to_gluster_acl(SMB_ACL_T theacl, char *buf, size_t len)
 	ace = hdr->entries;
 	smb_ace = theacl->acl;
 
-	hdr->version = htonl(GLUSTER_ACL_VERSION);
+	hdr->version = GLUSTER_ACL_VERSION;
 
 	for (i = 0; i < count; i++) {
 		switch(smb_ace->a_type) {
@@ -1157,7 +1196,7 @@ static ssize_t smb_to_gluster_acl(SMB_ACL_T theacl, char *buf, size_t len)
 			return -1;
 		}
 
-		ace->tag = ntohs(tag);
+		ace->tag = tag;
 
 		switch(smb_ace->a_type) {
 		case SMB_ACL_USER:
@@ -1171,7 +1210,7 @@ static ssize_t smb_to_gluster_acl(SMB_ACL_T theacl, char *buf, size_t len)
 			break;
 		}
 
-		ace->id = ntohl(id);
+		ace->id = id;
 
 		ace->perm = 0;
 		ace->perm |=
@@ -1184,6 +1223,9 @@ static ssize_t smb_to_gluster_acl(SMB_ACL_T theacl, char *buf, size_t len)
 		ace++;
 		smb_ace++;
 	}
+
+	gluster_acl_normalize (hdr, count);
+	gluster_acl_to_xattr (hdr, count);
 
 	return size;
 }
