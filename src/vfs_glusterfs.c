@@ -39,9 +39,11 @@
 /* This is global. gfapi's FD operations do not
    require filesystem context.
 */
+
 static glfs_fd_t **glfd_fd;
 static int glfd_fd_size;
 static int glfd_fd_used;
+
 static int glfd_fd_store(glfs_fd_t *glfd)
 {
 	int i;
@@ -92,6 +94,7 @@ static glfs_fd_t *glfd_fd_clear(int i)
 	}
 
 	glfd = glfd_fd[i];
+
 	glfd_fd[i] = 0;
 	glfd_fd_used--;
 	return glfd;
@@ -182,7 +185,6 @@ static glfs_t *glfs_find_preopened(const char *volume)
 
 static void glfs_clear_preopened(glfs_t *fs)
 {
-	int i;
 	struct glfs_preopened *entry = NULL;
 
 	for (entry = glfs_preopened; entry; entry = entry->next) {
@@ -201,7 +203,8 @@ static void glfs_clear_preopened(glfs_t *fs)
 /* Disk Operations */
 
 static int vfs_gluster_connect(struct vfs_handle_struct *handle,
-			       const char *service, const char *user)
+			       const char *service,
+			       const char *user)
 {
 	const char *volfile_server;
 	const char *volume;
@@ -291,10 +294,10 @@ static void vfs_gluster_disconnect(struct vfs_handle_struct *handle)
 	glfs_clear_preopened(fs);
 }
 
-static uint64_t
-vfs_gluster_disk_free(struct vfs_handle_struct *handle, const char *path,
-		      bool small_query, uint64_t *bsize_p, uint64_t *dfree_p,
-		      uint64_t *dsize_p)
+static uint64_t vfs_gluster_disk_free(struct vfs_handle_struct *handle,
+				      const char *path, bool small_query,
+				      uint64_t *bsize_p, uint64_t *dfree_p,
+				      uint64_t *dsize_p)
 {
 	struct statvfs statvfs = { 0, };
 	int ret;
@@ -319,9 +322,9 @@ vfs_gluster_disk_free(struct vfs_handle_struct *handle, const char *path,
 	return (uint64_t)statvfs.f_bavail;
 }
 
-static int
-vfs_gluster_get_quota(struct vfs_handle_struct *handle,
-		      enum SMB_QUOTA_TYPE qtype, unid_t id, SMB_DISK_QUOTA *qt)
+static int vfs_gluster_get_quota(struct vfs_handle_struct *handle,
+				 enum SMB_QUOTA_TYPE qtype, unid_t id,
+				 SMB_DISK_QUOTA *qt)
 {
 	errno = ENOSYS;
 	return -1;
@@ -421,7 +424,7 @@ static SMB_STRUCT_DIRENT *vfs_gluster_readdir(struct vfs_handle_struct *handle,
 		ret = glfs_readdir_r((void *)dirp, (void *)direntbuf, &dirent);
 	}
 
-	if (ret < 0 || (dirent == NULL)) {
+	if ((ret < 0) || (dirent == NULL)) {
 		return NULL;
 	}
 
@@ -449,8 +452,7 @@ static void vfs_gluster_seekdir(struct vfs_handle_struct *handle, DIR *dirp,
 	glfs_seekdir((void *)dirp, offset);
 }
 
-static void vfs_gluster_rewinddir(struct vfs_handle_struct *handle,
-				  DIR *dirp)
+static void vfs_gluster_rewinddir(struct vfs_handle_struct *handle, DIR *dirp)
 {
 	glfs_seekdir((void *)dirp, 0);
 }
@@ -506,8 +508,8 @@ static ssize_t vfs_gluster_read(struct vfs_handle_struct *handle,
 }
 
 static ssize_t vfs_gluster_pread(struct vfs_handle_struct *handle,
-				 files_struct *fsp, void *data, size_t n,
-				 off_t offset)
+				 files_struct *fsp, void *data,
+				 size_t n, off_t offset)
 {
 	return glfs_pread(glfd_fd_get(fsp->fh->fd), data, n, offset, 0);
 }
@@ -519,8 +521,8 @@ static ssize_t vfs_gluster_write(struct vfs_handle_struct *handle,
 }
 
 static ssize_t vfs_gluster_pwrite(struct vfs_handle_struct *handle,
-				  files_struct *fsp, const void *data, size_t n,
-				  off_t offset)
+				  files_struct *fsp, const void *data,
+				  size_t n, off_t offset)
 {
 	return glfs_pwrite(glfd_fd_get(fsp->fh->fd), data, n, offset, 0);
 }
@@ -532,7 +534,8 @@ static off_t vfs_gluster_lseek(struct vfs_handle_struct *handle,
 }
 
 static ssize_t vfs_gluster_sendfile(struct vfs_handle_struct *handle, int tofd,
-				    files_struct *fromfsp, const DATA_BLOB *hdr,
+				    files_struct *fromfsp,
+				    const DATA_BLOB *hdr,
 				    off_t offset, size_t n)
 {
 	errno = ENOTSUP;
@@ -589,7 +592,7 @@ static int vfs_gluster_fstat(struct vfs_handle_struct *handle,
 		smb_stat_ex_from_stat(sbuf, &st);
 	}
 	if (ret < 0) {
-		DEBUG(0, ("glfs_ftat(%d) failed: %s\n",
+		DEBUG(0, ("glfs_fstat(%d) failed: %s\n",
 			  fsp->fh->fd, strerror(errno)));
 	}
 	return ret;
@@ -609,7 +612,6 @@ static int vfs_gluster_lstat(struct vfs_handle_struct *handle,
 		DEBUG(0, ("glfs_lstat(%s) failed: %s\n",
 			  smb_fname->base_name, strerror(errno)));
 	}
-
 	return ret;
 }
 
@@ -798,13 +800,13 @@ static int vfs_gluster_mknod(struct vfs_handle_struct *handle, const char *path,
 	return glfs_mknod(handle->data, path, mode, dev);
 }
 
-static NTSTATUS vfs_gluster_notify_watch(struct vfs_handle_struct *vfs_handle,
+static NTSTATUS vfs_gluster_notify_watch(struct vfs_handle_struct *handle,
 					 struct sys_notify_context *ctx,
 					 struct notify_entry *e,
 					 void (*callback) (struct sys_notify_context *ctx,
 							   void *private_data,
 							   struct notify_event *ev),
-					 void *private_data, void *handle)
+					 void *private_data, void *handle_p)
 {
 	return NT_STATUS_NOT_IMPLEMENTED;
 }
