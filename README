@@ -1,8 +1,9 @@
-Samba VFS module for GlusterFS
+GlusterFS VFS module for Samba 3.6.x
 
 == Compiling ==
 
-1.) Download and unpack a Samba source tree.
+1.) Download and unpack a Samba source tree. Usually you want to get
+    a Samba git repository and checkout the "v3-6-test" branch.
 
 2.) Run "./configure" from the /path/to/samba_dir/source3 directory
 
