@@ -149,7 +149,7 @@ static int vfs_gluster_connect(struct vfs_handle_struct *handle,
 	const char *volume;
 	char *logfile;
 	int loglevel;
-	glfs_t *fs;
+	glfs_t *fs = NULL;
 	int ret = 0;
 
 	logfile = lp_parm_talloc_string(SNUM(handle->conn), "glusterfs",
@@ -158,7 +158,7 @@ static int vfs_gluster_connect(struct vfs_handle_struct *handle,
 	loglevel = lp_parm_int(SNUM(handle->conn), "glusterfs", "loglevel", -1);
 
 	volfile_server = lp_parm_const_string(SNUM(handle->conn), "glusterfs",
-					      "volfile_server", NULL);
+					       "volfile_server", NULL);
 	if (volfile_server == NULL) {
 		volfile_server = DEFAULT_VOLFILE_SERVER;
 	}
@@ -251,13 +251,13 @@ static uint64_t vfs_gluster_disk_free(struct vfs_handle_struct *handle,
 		return -1;
 	}
 
-	if (bsize_p) {
+	if (bsize_p != NULL) {
 		*bsize_p = (uint64_t)statvfs.f_bsize; /* Block size */
 	}
-	if (dfree_p) {
+	if (dfree_p != NULL) {
 		*dfree_p = (uint64_t)statvfs.f_bavail; /* Available Block units */
 	}
-	if (dsize_p) {
+	if (dsize_p != NULL) {
 		*dsize_p = (uint64_t)statvfs.f_blocks; /* Total Block units */
 	}
 
@@ -353,7 +353,7 @@ static SMB_STRUCT_DIRENT *vfs_gluster_readdir(struct vfs_handle_struct *handle,
 					      SMB_STRUCT_DIR *dirp,
 					      SMB_STRUCT_STAT *sbuf)
 {
-	char direntbuf[512];
+	static char direntbuf[512];
 	int ret;
 	struct stat stat;
 	struct dirent *dirent = 0;
