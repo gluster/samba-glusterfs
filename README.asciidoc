@@ -28,7 +28,7 @@ version of Samba.
 Compiling
 ---------
 
-1. Download and unpack a Samba source tree. Usually you want to get
+1. Download and unpack a Samba source tree. Usually you want to get 
    a Samba git repository and checkout the "v3-6-test" branch.
 
 2. Run "./configure" from the /path/to/samba_dir/source3 directory
@@ -38,11 +38,12 @@ Compiling
 4. ./configure --with-samba-source=/path/to/samba_dir/source3
 
  a. Optional/useful configure options:
-    --with-glusterfs	Path to the parent directory containing the 
-			GlusterFS installation to build against.
-    --with-fhs		Are we using Filesystem Hierarchy Standard
-			compliant paths?
-    --prefix		Installation prefix. (e.g. "/usr")
+ 
+    --with-glusterfs  Path to the parent directory containing the
+                      GlusterFS installation to build against.
+    --with-fhs        Are we using Filesystem Hierarchy Standard 
+                      compliant paths?
+    --prefix          Installation prefix. (e.g. "/usr")
 
 5. make
 
@@ -56,25 +57,26 @@ Installing
 Clean-up
 --------
 
-1. make clean
+1. make clean +
    Removes build files.
 
-2. make distclean
-   Removes any files generated from all the above commands, including
+2. make distclean +
+   Removes any files generated from all the above commands, including 
    the Makefile.
 
 Usage
 -----
 
-When defining a share in smb.conf, the following options are 
-required for sharing a GlusterFS volume:
+When defining a share in smb.conf, the following options are required for 
+sharing a GlusterFS volume:
 
-[sharename]
+ [sharename]
 	vfs object = glusterfs     # Load the VFS module
 	glusterfs:volume = volname # GlusterFS volume to share
 	path = /                   # Path relative to the root of the
 	                           # GlusterFS volume.
 
 Other useful configuration options:
+
 	glusterfs:loglevel = 2       # Logging level
 	glusterfs:logfile = /tmp/foo # Path to log file
