@@ -1,0 +1,80 @@
+GlusterFS VFS module for Samba 3.6.x
+====================================
+
+Our goal is to provide a seamless experience sharing GlusterFS volumes over 
+SMB to all clients. This means leveraging Samba’s VFS (Virtual FileSystem) 
+layer’s capabilities to bypass the filesystem layer and talk to GlusterFS as 
+a directly-accessed object store.
+
+From Wikipedia:
+
+  Samba is a free software re-implementation of the SMB/CIFS networking 
+  protocol, originally developed by Andrew Tridgell. As of version 3, Samba 
+  provides file and print services for various Microsoft Windows clients and 
+  can integrate with a Windows Server domain, either as a Primary Domain 
+  Controller (PDC) or as a domain member. It can also be part of an Active 
+  Directory domain.
+
+This project exists to provide an independent development space for a VFS 
+module known as vfs_glusterfs, and is focused on integration with 
+Samba version 3.6.9^[1]^. Another version of vfs_glusterfs exists in the master 
+Samba branch^[2]^ which is focused on integration with the latest and greatest 
+version of Samba.
+
+^[1]^ http://gitweb.samba.org/?p=samba.git;a=commit;h=951e58303646fc0eb3360b0865631b6c96b6959f[Samba 3.6.9]
+
+^[2]^ http://gitweb.samba.org/?p=samba.git;a=shortlog;h=refs/heads/master[Master Samba branch]
+
+Compiling
+---------
+
+1. Download and unpack a Samba source tree. Usually you want to get
+   a Samba git repository and checkout the "v3-6-test" branch.
+
+2. Run "./configure" from the /path/to/samba_dir/source3 directory
+
+3. ./autogen.sh
+
+4. ./configure --with-samba-source=/path/to/samba_dir/source3
+
+ a. Optional/useful configure options:
+    --with-glusterfs	Path to the parent directory containing the 
+			GlusterFS installation to build against.
+    --with-fhs		Are we using Filesystem Hierarchy Standard
+			compliant paths?
+    --prefix		Installation prefix. (e.g. "/usr")
+
+5. make
+
+Installing
+----------
+
+1. make install
+
+2. Start/Restart Samba
+
+Clean-up
+--------
+
+1. make clean
+   Removes build files.
+
+2. make distclean
+   Removes any files generated from all the above commands, including
+   the Makefile.
+
+Usage
+-----
+
+When defining a share in smb.conf, the following options are 
+required for sharing a GlusterFS volume:
+
+[sharename]
+	vfs object = glusterfs     # Load the VFS module
+	glusterfs:volume = volname # GlusterFS volume to share
+	path = /                   # Path relative to the root of the
+	                           # GlusterFS volume.
+
+Other useful configuration options:
+	glusterfs:loglevel = 2       # Logging level
+	glusterfs:logfile = /tmp/foo # Path to log file
