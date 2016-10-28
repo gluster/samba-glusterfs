@@ -1,6 +1,8 @@
 GlusterFS VFS module for Samba 3.6.x
 ====================================
 
+*THIS PROJECT IS NO LONGER MAINTAINED*
+
 Our goal is to provide a seamless experience sharing GlusterFS volumes over 
 SMB to all clients. This means leveraging Samba’s VFS (Virtual FileSystem) 
 layer’s capabilities to bypass the filesystem layer and talk to GlusterFS as 
